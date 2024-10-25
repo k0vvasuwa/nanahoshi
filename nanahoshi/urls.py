@@ -1,4 +1,7 @@
-from django.urls import path
+from django.urls import (
+    path,
+    include
+)
 
 from django.contrib import admin
 
@@ -9,5 +12,6 @@ api_prefix: str = 'api/'
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path(f'{api_prefix}set-csrf-token', set_csrf_token)
+    path(f'{api_prefix}set-csrf-token', set_csrf_token),
+    path(f'{api_prefix}auth/', include('authentication.urls'))
 ]
