@@ -23,6 +23,7 @@
         "paths": {
             "#styles": ["./src/styles.css"],
             "#router": ["./src/router.ts"],
+            "#functions": ["./src/functions.ts"],
             "#components/*": ["./src/components/*.vue"]
         }
     },

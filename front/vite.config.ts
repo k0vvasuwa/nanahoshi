@@ -26,6 +26,7 @@ export default defineConfig({
         alias: {
             '#styles': '/src/styles.css',
             '#router': '/src/router.ts',
+            '#functions': '/src/functions.ts',
             '#components': '/src/components'
         }
     }
