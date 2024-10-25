@@ -29,7 +29,6 @@ export default defineConfig({
             '#types': '/src/types.ts',
             '#router': '/src/router.ts',
             '#functions': '/src/functions',
-            '#requests': '/src/requests.ts',
             '#components': '/src/components'
         }
     }
