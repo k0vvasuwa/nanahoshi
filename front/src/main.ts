@@ -5,7 +5,7 @@ import {
 
 import AppComponent from './App.vue';
 
-import './style.css';
+import '#styles';
 
 import router from '#router';
 
