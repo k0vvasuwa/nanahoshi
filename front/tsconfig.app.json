@@ -21,6 +21,7 @@
         "noFallthroughCasesInSwitch": true,
         "noUncheckedSideEffectImports": true,
         "paths": {
+            "#styles": ["./src/styles.css"],
             "#router": ["./src/router.ts"],
             "#components/*": ["./src/components/*.vue"]
         }

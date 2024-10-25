@@ -13,6 +13,7 @@ export default defineConfig({
             '.vue'
         ],
         alias: {
+            '#styles': '/src/styles.css',
             '#router': '/src/router.ts',
             '#components': '/src/components'
         }
