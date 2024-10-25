@@ -11,6 +11,10 @@ export default defineConfig({
             '.css',
             '.ts',
             '.vue'
-        ]
+        ],
+        alias: {
+            '#router': '/src/router.ts',
+            '#components': '/src/components'
+        }
     }
 });
