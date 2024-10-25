@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-import { getCsrfToken } from '#functions';
+import { getCsrfToken } from '#functions/misc';
 
 
 
