@@ -11,3 +11,4 @@ export function getCsrfToken(): string {
 
     return token;
 }
+
