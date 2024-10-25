@@ -20,6 +20,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'corsheaders',
     'storage.apps.StorageConfig',
+    "authentication.apps.AuthenticationConfig"
 ]
 
 MIDDLEWARE = [
