@@ -34,7 +34,11 @@ async function start(): Promise<void> {
     const loggedIn: boolean = await checkUserLoggedIn();
 
     if (loggedIn) {
+        if (route.name === 'login') {
+            redirect('/');
+        }
 
+        // load settings...
     } else {
         if (route.name !== 'login') {
             redirect('/login');
@@ -43,7 +47,7 @@ async function start(): Promise<void> {
         const theme: string | null = localStorage.getItem('theme');
 
         if (theme) {
-            setTheme(theme);
+            setTheme(theme as Theme);
         } else {
             const prefersDarkTheme: boolean = window.matchMedia("(prefers-color-scheme: dark)").matches;
 
