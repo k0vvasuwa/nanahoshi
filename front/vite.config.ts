@@ -4,8 +4,19 @@ import vue from '@vitejs/plugin-vue';
 
 
 
+const proxy = {
+    target: 'http://localhost:8000',
+};
+
+
+
 export default defineConfig({
     plugins: [vue()],
+    server: {
+        proxy: {
+            '/api': proxy
+        }
+    },
     resolve: {
         extensions: [
             '.css',
