@@ -1,0 +1,7 @@
+/.venv/
+.idea/
+__init__.py
+migrations/
+/media/
+.env
+node_modules/
