@@ -25,6 +25,7 @@ export default defineConfig({
         ],
         alias: {
             '#styles': '/src/styles.css',
+            '#enums': '/src/enums.ts',
             '#types': '/src/types.ts',
             '#router': '/src/router.ts',
             '#functions': '/src/functions',
