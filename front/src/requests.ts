@@ -23,3 +23,10 @@ export async function setCsrfToken(): Promise<void> {
 export async function checkUserLoggedIn(): Promise<boolean> {
     return (await axios.get(`${authUrl}get-login-status`)).data.loggedIn;
 }
+
+export async function login(username: string, password: string): Promise<void> {
+    await axios.post(`${authUrl}login`, {
+        username,
+        password
+    });
+}
