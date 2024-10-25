@@ -1,0 +1,1 @@
+export type Redirect = (url: string) => Promise<void>
