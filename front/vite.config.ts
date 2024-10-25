@@ -27,6 +27,7 @@ export default defineConfig({
             '#styles': '/src/styles.css',
             '#router': '/src/router.ts',
             '#functions': '/src/functions.ts',
+            '#requests': '/src/requests.ts',
             '#components': '/src/components'
         }
     }
