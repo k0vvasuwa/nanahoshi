@@ -30,3 +30,7 @@ export async function login(username: string, password: string): Promise<void> {
         password
     });
 }
+
+export async function logout(): Promise<void> {
+    await axios.get(`${authUrl}logout`);
+}
