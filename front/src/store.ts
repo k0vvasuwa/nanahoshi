@@ -1,11 +1,19 @@
+import axios from 'axios';
+
 import { defineStore } from 'pinia';
 
 import { ref } from 'vue';
 
-import { authUrl } from '#functions/requests';
-import axios from 'axios';
+import { Settings } from '#types';
+
+import {
+    apiPrefix,
+    storeUrl
+} from '#functions/requests';
 
 
+
+const authUrl: string = `${apiPrefix}/auth/`;
 
 const useSettingsStore = defineStore('settings', () => {
     const loggedIn = ref<boolean>(false);
@@ -39,6 +47,18 @@ const useSettingsStore = defineStore('settings', () => {
         if (loggedIn.value) {
 
         }
+    }
+
+    async function save(data: Partial<Settings>) {
+        await axios.patch(`${storeUrl}settings/1`, data);
+    }
+
+    async function saveAll(): Promise<void> {
+        const data: Settings = {
+            dark_theme: darkTheme.value
+        };
+
+        await save(data);
     }
 
     return {
