@@ -14,6 +14,25 @@ body {
     flex-direction: column;
 }
 
+.gap-10 {
+    gap: 10px;
+}
+
+.align-self-end {
+    align-self: flex-end;
+}
+
+.align-self-center {
+    align-self: center;
+}
+
+.absolutely-centered {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
 .app-logo {
     color: #34d399;
     font-size: 1.5em;
