@@ -4,8 +4,8 @@ import { getCsrfToken } from '#functions/misc';
 
 
 
-const apiPrefix: string = '/api/';
-export const authUrl: string = `${apiPrefix}/auth/`;
+export const apiPrefix: string = '/api/';
+export const storeUrl: string = `${apiPrefix}store/`;
 
 
 
