@@ -8,16 +8,13 @@ import {
     useRoute
 } from 'vue-router';
 
-import { Theme } from '#enums';
+import useSettingsStore from './store.ts';
 
-import { setTheme } from '#functions/theme';
-
-import {
-    setCsrfToken,
-    checkUserLoggedIn
-} from '#functions/requests';
+import { setCsrfToken } from '#functions/requests';
 
 
+
+const settings = useSettingsStore();
 
 const router: Router = useRouter();
 const route: RouteLocationNormalizedLoaded = useRoute();
@@ -31,9 +28,9 @@ async function redirect(url: string): Promise<void> {
 async function start(): Promise<void> {
     await setCsrfToken();
 
-    const loggedIn: boolean = await checkUserLoggedIn();
+    await settings.setLoginStatus();
 
-    if (loggedIn) {
+    if (settings.loggedIn) {
         if (route.name === 'login') {
             redirect('/');
         }
@@ -43,18 +40,7 @@ async function start(): Promise<void> {
         if (route.name !== 'login') {
             redirect('/login');
         }
-
-        const theme: string | null = localStorage.getItem('theme');
-
-        if (theme) {
-            setTheme(theme as Theme);
-        } else {
-            const prefersDarkTheme: boolean = window.matchMedia("(prefers-color-scheme: dark)").matches;
-
-            if (prefersDarkTheme) {
-                setTheme(Theme.Dark);
-            }
-        }
+        settings.obtainLocalData();
     }
 }
 
