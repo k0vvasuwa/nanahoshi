@@ -86,6 +86,8 @@ provide('redirect', redirect);
 
 <template>
     <RouterView />
+    <Toast />
+    <ConfirmDialog />
 </template>
 
 <style scoped>
