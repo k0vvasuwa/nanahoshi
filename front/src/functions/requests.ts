@@ -5,7 +5,7 @@ import { getCsrfToken } from '#functions/misc';
 
 
 export const apiPrefix: string = '/api/';
-export const storeUrl: string = `${apiPrefix}store/`;
+export const storageUrl: string = `${apiPrefix}storage/`;
 
 
 
