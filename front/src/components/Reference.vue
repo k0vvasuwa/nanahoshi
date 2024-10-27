@@ -34,7 +34,8 @@ import { getRootNote } from '#functions/misc';
 
 import {
     getNotes,
-    createNote
+    createNote,
+    updateNote
 } from '#functions/requests';
 
 import {
@@ -90,11 +91,44 @@ const newNoteHandler = ref({
 
             this.dialogVisible = false;
 
-            toast.success('Запрос выполнен');
+            toast.success('Запрос выполнен', `Запись «${createdNote.name}» добавлена к записи «${parent.name}»`);
         } catch (e) {
             const error = e as AxiosError;
 
             toast.error('Не удалось добавить запись', error.message);
+        }
+    }
+});
+
+const renameNoteHandler = ref({
+    dialogVisible: false,
+    name: '',
+    triedSave: false,
+    async rename(): Promise<void> {
+        this.triedSave = true;
+
+        if (!this.name) {
+            return;
+        }
+
+        const target: Note = selectedNote.value;
+
+        try {
+            const renamedNote: Note = await updateNote(target.id, {
+                name: this.name
+            });
+
+            const oldLabel: string = target.name;
+
+            target.name = renamedNote.name;
+
+            this.dialogVisible = false;
+
+            toast.success('Запрос выполнен', `Запись «${oldLabel}» переименована в «${target.name}»`);
+        } catch (e) {
+            const error = e as AxiosError;
+
+            toast.error(`Не удалось переименовать запись`, error.message);
         }
     }
 });
@@ -145,6 +179,12 @@ contextMenuItems.value[0].command = (): void => {
     newNoteHandler.value.dialogVisible = true;
 };
 
+contextMenuItems.value[1].command = (): void => {
+    renameNoteHandler.value.triedSave = false;
+    renameNoteHandler.value.name = selectedNote.value.name;
+    renameNoteHandler.value.dialogVisible = true;
+};
+
 const rootNote: Note = notes.value[0];
 
 getNotes(1).then(
@@ -184,6 +224,17 @@ onMounted((): void => {
         <template #footer>
             <Button label="Отмена" severity="danger" outlined @click="newNoteHandler.dialogVisible = false;" />
             <Button label="Сохранить" @click="newNoteHandler.create()" />
+        </template>
+    </Dialog>
+    <Dialog v-model:visible="renameNoteHandler.dialogVisible" modal :header="`${selectedNote.name} – переименование`">
+        <IconField>
+            <InputIcon class="pi pi-file" />
+            <InputText v-model="renameNoteHandler.name" placeholder="Имя записи" variant="filled"
+                       :invalid="!renameNoteHandler.name && renameNoteHandler.triedSave" size="large" fluid />
+        </IconField>
+        <template #footer>
+            <Button label="Отмена" severity="danger" outlined @click="renameNoteHandler.dialogVisible = false;" />
+            <Button label="Сохранить" @click="renameNoteHandler.rename()" />
         </template>
     </Dialog>
 </template>
