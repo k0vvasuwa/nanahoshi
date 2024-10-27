@@ -27,12 +27,20 @@ body {
     gap: 10px;
 }
 
+.align-center {
+    align-items: center;
+}
+
 .align-self-end {
     align-self: flex-end;
 }
 
 .align-self-center {
     align-self: center;
+}
+
+.spacer {
+    flex-grow: 1;
 }
 
 .absolutely-centered {
