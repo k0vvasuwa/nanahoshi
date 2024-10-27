@@ -6,6 +6,14 @@ export type Settings = {
     programming_languages: object
 }
 
+export type Toast = {
+    success: ToastCall
+    info: ToastCall
+    warn: ToastCall
+    error: ToastCall
+}
 
 
+
+type ToastCall = (message: string, details?: string) => void
 export type Redirect = (url: string) => Promise<void>
