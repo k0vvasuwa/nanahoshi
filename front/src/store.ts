@@ -17,7 +17,11 @@ const authUrl: string = `${apiPrefix}/auth/`;
 
 const useSettingsStore = defineStore('settings', () => {
     const loggedIn = ref<boolean>(false);
-    const darkTheme = ref<boolean>(false);
+    const dark_theme = ref<boolean>(false);
+    const expanded_notes = ref<number[]>([]);
+    const opened_tabs = ref<number[]>([]);
+    const splitter_size = ref<number>(20);
+    const programming_languages = ref<Record<string, string>>({});
 
     function obtainLocalData(): void {
         const theme: string | null = localStorage.getItem('darkTheme');
@@ -52,21 +56,31 @@ const useSettingsStore = defineStore('settings', () => {
 
     async function toggleTheme(): Promise<void> {
         document.documentElement.classList.toggle('dark');
-        darkTheme.value = !darkTheme.value;
-        localStorage.setItem('darkTheme', `${+darkTheme.value}`);
+        dark_theme.value = !dark_theme.value;
+        localStorage.setItem('darkTheme', `${+dark_theme.value}`);
 
         if (loggedIn.value) {
-
+            await save({
+                dark_theme: dark_theme.value
+            });
         }
     }
 
+    async function load(): Promise<void> {
+
+    }
+
     async function save(data: Partial<Settings>) {
-        await axios.patch(`${storeUrl}settings/1`, data);
+        await axios.patch(`${storeUrl}settings/1/`, data);
     }
 
     async function saveAll(): Promise<void> {
         const data: Settings = {
-            dark_theme: darkTheme.value
+            dark_theme: dark_theme.value,
+            expanded_notes: expanded_notes.value,
+            opened_tabs: opened_tabs.value,
+            splitter_size: splitter_size.value,
+            programming_languages: programming_languages.value
         };
 
         await save(data);
@@ -74,7 +88,7 @@ const useSettingsStore = defineStore('settings', () => {
 
     return {
         loggedIn,
-        darkTheme,
+        darkTheme: dark_theme,
         obtainLocalData,
         setLoginStatus,
         login,
