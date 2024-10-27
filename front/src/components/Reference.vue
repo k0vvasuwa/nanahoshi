@@ -2,8 +2,12 @@
 import {
     ref,
     useTemplateRef,
-    onMounted
+    onMounted,
+    inject,
+    nextTick
 } from 'vue';
+
+import { AxiosError } from 'axios';
 
 import { Draggable } from '@he-tree/vue';
 import { Stat } from '@he-tree/tree-utils';
@@ -13,13 +17,24 @@ import '@he-tree/vue/style/material-design.css';
 import { MenuItem } from 'primevue/menuitem';
 import ContextMenu from 'primevue/contextmenu';
 
+import IconField from 'primevue/iconfield';
+import InputIcon from 'primevue/inputicon';
+import InputText from 'primevue/inputtext';
 
-import { Note } from '#types';
+import Dialog from 'primevue/dialog';
+import Button from 'primevue/button';
+
+
+import {
+    Toast,
+    Note
+} from '#types';
 
 import { getRootNote } from '#functions/misc';
 
 import {
-    getNotes
+    getNotes,
+    createNote
 } from '#functions/requests';
 
 import {
@@ -29,6 +44,8 @@ import {
 
 
 
+const toast = inject('toast') as Toast;
+
 const notes = ref<Note[]>([getRootNote()]);
 
 const tree = useTemplateRef<InstanceType<typeof Draggable>>('tree');
@@ -36,7 +53,51 @@ const height = ref<string>('800px');
 
 const contextMenu = useTemplateRef<InstanceType<typeof ContextMenu>>('contextMenu');
 const contextMenuItems = ref<MenuItem[]>(getContextMenuItems());
+
 const selectedNote = ref<Note>({} as Note);
+const selectedNoteElement = ref<HTMLElement>(null as unknown as HTMLElement);
+
+const newNoteHandler = ref({
+    dialogVisible: false,
+    name: '',
+    triedSave: false,
+    async create(): Promise<void> {
+        this.triedSave = true;
+
+        if (!this.name) {
+            return;
+        }
+
+        const parent: Note = selectedNote.value;
+        try {
+            const createdNote: Note = await createNote(this.name, parent.id);
+
+            const parentStat: Stat<Note> = getStat(parent);
+            parentStat.open = true;
+
+            if (!parent.has_children) {
+                parent.has_children = true;
+            }
+
+            parent.children ??= [];
+            parent.children.push(createdNote);
+
+            tree.value!.add(createdNote, getStat(parent));
+
+            nextTick((): void => {
+                selectedNoteElement.value.previousElementSibling!.classList.toggle('down');
+            });
+
+            this.dialogVisible = false;
+
+            toast.success('Запрос выполнен');
+        } catch (e) {
+            const error = e as AxiosError;
+
+            toast.error('Не удалось добавить запись', error.message);
+        }
+    }
+});
 
 
 
@@ -66,6 +127,7 @@ function getStat(note: Note): Stat<Note> {
 
 function openContextMenu(event: PointerEvent, note: Note): void {
     selectedNote.value = note;
+    selectedNoteElement.value = event.target as HTMLElement;
 
     [
         contextMenuItems.value[0].disabled,
@@ -77,6 +139,11 @@ function openContextMenu(event: PointerEvent, note: Note): void {
 }
 
 
+
+contextMenuItems.value[0].command = (): void => {
+    newNoteHandler.value.triedSave = false;
+    newNoteHandler.value.dialogVisible = true;
+};
 
 const rootNote: Note = notes.value[0];
 
@@ -108,6 +175,17 @@ onMounted((): void => {
         </template>
     </Draggable>
     <ContextMenu ref="contextMenu" :model="contextMenuItems" />
+    <Dialog v-model:visible="newNoteHandler.dialogVisible" modal :header="`${selectedNote.name} – новая запись`">
+        <IconField>
+            <InputIcon class="pi pi-file" />
+            <InputText v-model="newNoteHandler.name" placeholder="Имя записи" variant="filled"
+                       :invalid="!newNoteHandler.name && newNoteHandler.triedSave" size="large" fluid />
+        </IconField>
+        <template #footer>
+            <Button label="Отмена" severity="danger" outlined @click="newNoteHandler.dialogVisible = false;" />
+            <Button label="Сохранить" @click="newNoteHandler.create()" />
+        </template>
+    </Dialog>
 </template>
 
 <style scoped>
@@ -116,6 +194,7 @@ onMounted((): void => {
 }
 
 :deep(.tree-node:hover) {
+    cursor: pointer;
     background-color: var(--node-hover-background);
 }
 
