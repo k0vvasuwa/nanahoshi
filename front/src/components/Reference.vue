@@ -15,6 +15,10 @@ import { Note } from '#types';
 
 import { getRootNote } from '#functions/misc';
 
+import {
+    getNotes
+} from '#functions/requests';
+
 
 
 const notes = ref<Note[]>([getRootNote()]);
@@ -27,7 +31,6 @@ const height = ref<string>('800px');
 function calcTreeHeight(): void {
     const docHeight: number = document.documentElement.clientHeight;
     const offset: number = tree.value!.$el.offsetTop;
-
     height.value = `${docHeight - offset}px`;
 }
 
@@ -36,19 +39,44 @@ function expandNode(event: PointerEvent, stat: Stat<Note>): void {
     stat.open = !stat.open;
 }
 
+async function loadChildren(note: Note): Promise<void> {
+    if (note.children !== undefined) {
+        return;
+    }
 
+    note.children = await getNotes(note.id);
+    tree.value!.addMulti(note.children, getStat(note));
+}
+
+function getStat(note: Note): Stat<Note> {
+    return tree.value!.getStat(note) as Stat<Note>;
+}
+
+
+
+const rootNote: Note = notes.value[0];
+
+getNotes(1).then(
+    children => {
+        rootNote.children = children;
+        tree.value!.addMulti(children, getStat(rootNote));
+    }
+)
 
 onMounted((): void => {
     tree.value!.$el.querySelector('i').classList.toggle('down');
+    getStat(rootNote).open = true;
+
     calcTreeHeight();
     window.addEventListener('resize', calcTreeHeight);
 });
 </script>
 
 <template>
-    <Draggable id="tree" class="mtl-tree" ref="tree" v-model="notes" virtualization textKey="name">
+    <Draggable id="tree" class="mtl-tree" ref="tree" v-model="notes" virtualization textKey="name" :defaultOpen="false">
         <template #default="{ node: note, stat}" >
-            <i class="pi pi-angle-right" @click="expandNode($event as PointerEvent, stat)" />
+            <i v-if="note.has_children" class="pi pi-angle-right" @click="expandNode($event as PointerEvent, stat)"
+               @mouseenter.once="loadChildren(note)" />
             <div class="spacer">{{ note.name }}</div>
         </template>
     </Draggable>
@@ -59,12 +87,17 @@ onMounted((): void => {
     height: v-bind(height);
 }
 
-:deep(.tree-node-inner:hover) {
-    background-color: var(--expand-icon-hover-background);
+:deep(.tree-node:hover) {
+    background-color: var(--node-hover-background);
 }
 
 .pi-angle-right {
     transition: rotate 150ms;
+    border-radius: 50%;
+}
+
+:deep(.pi-angle-right:hover) {
+    background-color: var(--expand-icon-hover-background);
 }
 
 .down {
