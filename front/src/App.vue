@@ -1,5 +1,7 @@
 <script setup lang="ts">
-import { provide } from 'vue';
+import {
+    provide
+} from 'vue';
 
 import {
     Router,
@@ -59,15 +61,13 @@ async function redirect(url: string): Promise<void> {
 
 async function start(): Promise<void> {
     await setCsrfToken();
-
     await settings.setLoginStatus();
 
     if (settings.loggedIn) {
         if (route.name === 'login') {
             redirect('/');
         }
-
-        // load settings...
+        settings.load();
     } else {
         if (route.name !== 'login') {
             redirect('/login');
