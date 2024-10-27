@@ -3,7 +3,7 @@ export type Settings = {
     expanded_notes: number[]
     opened_tabs: number[]
     splitter_size: number
-    programming_languages: object
+    programming_languages: Record<string, string>
 }
 
 export type Toast = {
