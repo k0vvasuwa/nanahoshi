@@ -18,7 +18,7 @@ export type Note = {
     position: number
     parent: number
     has_children: boolean
-    children: Note[]
+    children?: Note[]
 }
 
 
