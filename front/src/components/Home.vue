@@ -6,6 +6,9 @@ import Button from 'primevue/button';
 
 import useSettingsStore from '#store';
 
+import Reference from '#components/Reference';
+import NotePage from '#components/NotePage';
+
 
 
 const settings = useSettingsStore();
@@ -21,13 +24,16 @@ const settings = useSettingsStore();
                         @click="settings.toggleTheme(true)" />
                 <Button icon="pi pi-cog" text rounded />
             </div>
+            <Reference />
         </SplitterPanel>
         <SplitterPanel :minSize="60">
-            <div>5</div>
+            <NotePage />
         </SplitterPanel>
     </Splitter>
 </template>
 
 <style scoped>
-
+.p-splitter {
+    border: none;
+}
 </style>
