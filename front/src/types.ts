@@ -12,6 +12,15 @@ export type Toast = {
     error: ToastCall
 }
 
+export type Note = {
+    id: number
+    name: string
+    position: number
+    parent: number
+    has_children: boolean
+    children: Note[]
+}
+
 
 
 type ToastCall = (message: string, details?: string) => void
