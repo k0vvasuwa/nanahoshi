@@ -2,7 +2,6 @@ export type Settings = {
     dark_theme: boolean
     expanded_notes: number[]
     opened_tabs: number[]
-    splitter_size: number
     programming_languages: Record<string, string>
 }
 
