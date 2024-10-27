@@ -10,6 +10,8 @@ import {
 
 import PrimeVue from 'primevue/config';
 import Aura from '@primevue/themes/aura';
+import ToastService from 'primevue/toastservice';
+import ConfirmationService from 'primevue/confirmationservice';
 import 'primeicons/primeicons.css';
 
 import AppComponent from './App.vue';
@@ -35,6 +37,8 @@ app.use(PrimeVue, {
     }
 });
 
+app.use(ToastService);
+app.use(ConfirmationService);
 app.use(pinia);
 app.use(router);
 
