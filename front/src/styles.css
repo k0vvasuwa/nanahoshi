@@ -3,6 +3,7 @@
 
     --node-hover-background: #eaebef;
     --expand-icon-hover-background: #fff;
+    --node-drag-background: #ddf2f9;
 }
 
 :root[class="dark"] {
@@ -10,6 +11,7 @@
 
     --node-hover-background: #393941;
     --expand-icon-hover-background: #000;
+    --node-drag-background: #576465;
 }
 
 body {
