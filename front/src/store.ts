@@ -46,6 +46,10 @@ const useSettingsStore = defineStore('settings', () => {
         });
     }
 
+    async function logout(): Promise<void> {
+        await axios.get(`${authUrl}logout`);
+    }
+
     async function toggleTheme(): Promise<void> {
         document.documentElement.classList.toggle('dark');
         darkTheme.value = !darkTheme.value;
@@ -74,6 +78,7 @@ const useSettingsStore = defineStore('settings', () => {
         obtainLocalData,
         setLoginStatus,
         login,
+        logout,
         toggleTheme,
         save,
         saveAll
