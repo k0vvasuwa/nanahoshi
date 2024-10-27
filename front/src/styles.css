@@ -1,9 +1,15 @@
 :root {
     --background: #f7f8fc;
+
+    --node-hover-background: #eaebef;
+    --expand-icon-hover-background: #fff;
 }
 
 :root[class="dark"] {
     --background: #121212;
+
+    --node-hover-background: #393941;
+    --expand-icon-hover-background: #000;
 }
 
 body {
