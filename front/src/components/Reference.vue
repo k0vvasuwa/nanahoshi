@@ -10,6 +10,9 @@ import { Stat } from '@he-tree/tree-utils';
 import '@he-tree/vue/style/default.css';
 import '@he-tree/vue/style/material-design.css';
 
+import { MenuItem } from 'primevue/menuitem';
+import ContextMenu from 'primevue/contextmenu';
+
 
 import { Note } from '#types';
 
@@ -19,12 +22,21 @@ import {
     getNotes
 } from '#functions/requests';
 
+import {
+    getContextMenuItems,
+    getContextMenuPermissions
+} from '#functions/context_menu';
+
 
 
 const notes = ref<Note[]>([getRootNote()]);
 
 const tree = useTemplateRef<InstanceType<typeof Draggable>>('tree');
 const height = ref<string>('800px');
+
+const contextMenu = useTemplateRef<InstanceType<typeof ContextMenu>>('contextMenu');
+const contextMenuItems = ref<MenuItem[]>(getContextMenuItems());
+const selectedNote = ref<Note>({} as Note);
 
 
 
@@ -52,6 +64,18 @@ function getStat(note: Note): Stat<Note> {
     return tree.value!.getStat(note) as Stat<Note>;
 }
 
+function openContextMenu(event: PointerEvent, note: Note): void {
+    selectedNote.value = note;
+
+    [
+        contextMenuItems.value[0].disabled,
+        contextMenuItems.value[1].disabled,
+        contextMenuItems.value[2].disabled
+    ] = getContextMenuPermissions(note);
+
+    contextMenu.value!.show(event);
+}
+
 
 
 const rootNote: Note = notes.value[0];
@@ -61,7 +85,7 @@ getNotes(1).then(
         rootNote.children = children;
         tree.value!.addMulti(children, getStat(rootNote));
     }
-)
+);
 
 onMounted((): void => {
     tree.value!.$el.querySelector('i').classList.toggle('down');
@@ -73,13 +97,17 @@ onMounted((): void => {
 </script>
 
 <template>
-    <Draggable id="tree" class="mtl-tree" ref="tree" v-model="notes" virtualization textKey="name" :defaultOpen="false">
-        <template #default="{ node: note, stat}" >
+    <Draggable id="tree" class="mtl-tree" ref="tree" v-model="notes" virtualization textKey="name" :defaultOpen="false"
+               treeLine>
+        <template #default="{ node: note, stat}">
             <i v-if="note.has_children" class="pi pi-angle-right" @click="expandNode($event as PointerEvent, stat)"
                @mouseenter.once="loadChildren(note)" />
-            <div class="spacer">{{ note.name }}</div>
+            <div class="spacer" @contextmenu="openContextMenu($event as PointerEvent, note)">
+                {{ note.name }}
+            </div>
         </template>
     </Draggable>
+    <ContextMenu ref="contextMenu" :model="contextMenuItems" />
 </template>
 
 <style scoped>
@@ -89,6 +117,10 @@ onMounted((): void => {
 
 :deep(.tree-node:hover) {
     background-color: var(--node-hover-background);
+}
+
+:deep(.he-tree-drag-placeholder) {
+    background-color: var(--node-drag-background);
 }
 
 .pi-angle-right {
