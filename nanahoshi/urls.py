@@ -13,5 +13,6 @@ api_prefix: str = 'api/'
 urlpatterns = [
     path('admin/', admin.site.urls),
     path(f'{api_prefix}set-csrf-token', set_csrf_token),
-    path(f'{api_prefix}auth/', include('authentication.urls'))
+    path(f'{api_prefix}auth/', include('authentication.urls')),
+    path(f'{api_prefix}storage/', include('storage.urls'))
 ]
