@@ -32,3 +32,7 @@ export async function createNote(name: string, parent: number): Promise<Note> {
         parent
     })).data;
 }
+
+export async function updateNote(id: number, data: Partial<Note>): Promise<Note> {
+        return (await axios.patch(`${storageUrl}notes/${id}/`, data)).data;
+}
