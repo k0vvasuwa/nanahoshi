@@ -34,5 +34,9 @@ export async function createNote(name: string, parent: number): Promise<Note> {
 }
 
 export async function updateNote(id: number, data: Partial<Note>): Promise<Note> {
-        return (await axios.patch(`${storageUrl}notes/${id}/`, data)).data;
+    return (await axios.patch(`${storageUrl}notes/${id}/`, data)).data;
+}
+
+export async function deleteNote(id: number): Promise<void> {
+    await axios.delete(`${storageUrl}notes/${id}/`);
 }
