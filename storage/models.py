@@ -33,6 +33,8 @@ class Note(models.Model):
         if current_note.id == 1:
             return full_name
 
+        current_note = current_note.parent
+
         while current_note.id != 1:
             full_name = f'{current_note.name}. {full_name}'
             current_note = current_note.parent
