@@ -57,3 +57,21 @@ def get_note(request: HttpRequest, note_id: int) -> HttpResponse:
 
     with open(note.get_file_path(), 'r', encoding='utf-8') as note_file:
         return HttpResponse(note_file.read())
+
+
+@require_login
+@require_http_methods(['GET'])
+def check_note_has_specific_parent(request: HttpRequest) -> JsonResponse:
+    target_id: int = request.GET.get('target_id')
+    parent_id: int = request.GET.get('parent_id')
+
+    current_note: Note = Note.objects.get(pk=target_id).parent
+
+    while current_note.id != parent_id or current_note.id != 1:
+        current_note = current_note.parent
+
+    res: bool = current_note.id == parent_id
+
+    return JsonResponse({
+        'result': res
+    })
