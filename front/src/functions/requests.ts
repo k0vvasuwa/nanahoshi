@@ -40,3 +40,11 @@ export async function updateNote(id: number, data: Partial<Note>): Promise<Note>
 export async function deleteNote(id: number): Promise<void> {
     await axios.delete(`${storageUrl}notes/${id}/`);
 }
+
+export async function getNoteTitle(id: number): Promise<string> {
+    return (await axios.get(`${storageUrl}get-note-title/${id}`)).data;
+}
+
+export async function getNoteText(id: number): Promise<string> {
+    return (await axios.get(`${storageUrl}get-note-text/${id}`)).data;
+}
