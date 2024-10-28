@@ -191,7 +191,7 @@ loadSavedTabs();
             <Reference @selectNote="addTab" @renameNote="processTabsTitles" @deleteNote="checkTabsOnExistence" />
         </SplitterPanel>
         <SplitterPanel :minSize="60">
-            <Tabs v-if="tabs.length" v-model:value="currentTab" scrollable>
+            <Tabs v-model:value="currentTab" scrollable>
                 <TabList>
                     <Tab v-for="tab in tabs" :key="tab.noteId" :value="tab.value">
                         <div class="flex-row align-center">
