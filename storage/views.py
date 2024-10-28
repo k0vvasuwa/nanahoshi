@@ -58,6 +58,30 @@ class SettingsViewSet(viewsets.ModelViewSet):
             'message': 'Successful'
         })
 
+    @action(detail=True, methods=['patch'])
+    def add_opened_tab(self, request, pk=None):
+        settings = self.get_object()
+        note_id = request.data.get('note_id')
+        if note_id not in settings.opened_tabs:
+            settings.opened_tabs.append(note_id)
+            settings.save(update_fields=['opened_tabs'])
+
+        return Response({
+            'message': 'Successful'
+        })
+
+    @action(detail=True, methods=['patch'])
+    def remove_opened_tab(self, request, pk=None):
+        settings = self.get_object()
+        note_id = request.data.get('note_id')
+        if note_id in settings.opened_tabs:
+            settings.opened_tabs.remove(note_id)
+            settings.save(update_fields=['opened_tabs'])
+
+        return Response({
+            'message': 'Successful'
+        })
+
 
 class NoteViewSet(viewsets.ModelViewSet):
     serializer_class = NoteSerializer
