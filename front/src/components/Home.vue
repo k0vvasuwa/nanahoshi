@@ -22,9 +22,16 @@ import TabPanel from 'primevue/tabpanel';
 import useSettingsStore from '#store';
 
 import {
+    Note,
     TabNote,
     Redirect
 } from '#types';
+
+import {
+    checkNoteHasSpecificParent,
+    checkNoteExists,
+    getNoteTitle
+} from '#functions/requests';
 
 import Reference from '#components/Reference';
 import NotePage from '#components/NotePage';
@@ -39,7 +46,7 @@ const menu = useTemplateRef<InstanceType<typeof Menu>>('menu');
 const menuItems = ref<MenuItem[]>(getMenuItems());
 
 const tabs = ref<TabNote[]>([]);
-const currentTab = ref<string>();
+const currentTab = ref<string>('0');
 
 
 
@@ -79,15 +86,15 @@ function addTab(newTab: TabNote, active: boolean): void {
     }
 }
 
-function closeTab(event: PointerEvent, value: string): void {
-    event.stopPropagation();
+function closeTab(value: string, event?: PointerEvent): void {
+    event?.stopPropagation();
     const N: number = tabs.value.length;
 
     for (let i: number = 0; i < N; i++) {
         if (tabs.value[i].value === value) {
             tabs.value.splice(i, 1);
             if (N === 1) {
-                currentTab.value = undefined;
+                currentTab.value = '0';
             } else {
                 if (value === currentTab.value) {
                     let prevIndex: number = i - 1;
@@ -99,6 +106,39 @@ function closeTab(event: PointerEvent, value: string): void {
                 }
             }
             break;
+        }
+    }
+}
+
+async function processTabsTitles(renamedNote: Note): Promise<void> {
+    for (const tab of tabs.value) {
+        if (tab.noteId === renamedNote.id) {
+            tab.name = renamedNote.name;
+
+            const titleParts: string[] = tab.title.split('. ');
+            titleParts.pop();
+            titleParts.push(renamedNote.name);
+            tab.title = titleParts.join('. ');
+        } else if (await checkNoteHasSpecificParent(tab.noteId, renamedNote.id)) {
+            tab.title = await getNoteTitle(tab.noteId);
+        }
+    }
+}
+
+async function checkTabsOnExistence(deletedNoteId: number): Promise<void> {
+    const tabs_: TabNote[] = tabs.value;
+    const N: number = tabs_.length;
+    let curIndex: number = 0;
+
+    for (let i: number = 0; i < N; i++) {
+        const curTab: TabNote = tabs_[curIndex];
+
+        if (curTab.noteId === deletedNoteId) {
+            closeTab(curTab.value);
+        } else if (!(await checkNoteExists(curTab.noteId))) {
+            closeTab(curTab.value);
+        } else {
+            curIndex++;
         }
     }
 }
@@ -115,10 +155,10 @@ function closeTab(event: PointerEvent, value: string): void {
                 <Button icon="pi pi-cog" text rounded @click="menu?.toggle" />
                 <Menu ref="menu" :model="menuItems" popup />
             </div>
-            <Reference @selectNote="addTab" />
+            <Reference @selectNote="addTab" @renameNote="processTabsTitles" @deleteNote="checkTabsOnExistence" />
         </SplitterPanel>
         <SplitterPanel :minSize="60">
-            <Tabs v-if="currentTab" v-model:value="currentTab" scrollable>
+            <Tabs v-if="tabs.length" v-model:value="currentTab" scrollable>
                 <TabList>
                     <Tab v-for="tab in tabs" :key="tab.noteId" :value="tab.value">
                         <div class="flex-row align-center">
@@ -126,13 +166,13 @@ function closeTab(event: PointerEvent, value: string): void {
                                 {{ tab.name }}
                             </div>
                             <Button class="close-tab-btn" icon="pi pi-times-circle" text rounded size="small"
-                                    @click="closeTab($event as PointerEvent, tab.value)" />
+                                    @click="closeTab(tab.value, $event as PointerEvent)" />
                         </div>
                     </Tab>
                 </TabList>
                 <TabPanels>
                     <TabPanel v-for="tab in tabs" :key="tab.noteId" :value="tab.value">
-                        <NotePage :id="tab.noteId" />
+                        <NotePage :id="tab.noteId" :title="tab.title" />
                     </TabPanel>
                 </TabPanels>
             </Tabs>
