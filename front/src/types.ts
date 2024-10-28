@@ -25,7 +25,6 @@ export type TabNote = {
     value: string
     noteId: number
     name: string
-    title: string
 }
 
 
