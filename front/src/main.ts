@@ -14,6 +14,8 @@ import ToastService from 'primevue/toastservice';
 import ConfirmationService from 'primevue/confirmationservice';
 import 'primeicons/primeicons.css';
 
+import { CkeditorPlugin } from '@ckeditor/ckeditor5-vue';
+
 import AppComponent from './App.vue';
 
 import '#styles';
@@ -41,5 +43,6 @@ app.use(ToastService);
 app.use(ConfirmationService);
 app.use(pinia);
 app.use(router);
+app.use(CkeditorPlugin);
 
 app.mount('#app');
