@@ -1,7 +1,5 @@
 <script setup lang="ts">
-import {
-    provide
-} from 'vue';
+import { provide } from 'vue';
 
 import {
     Router,
@@ -85,7 +83,9 @@ provide('redirect', redirect);
 </script>
 
 <template>
-    <RouterView />
+    <RouterView #default="{ Component }">
+        <Component :is="Component" />
+    </RouterView>
     <Toast />
     <ConfirmDialog />
 </template>
