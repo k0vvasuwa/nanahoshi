@@ -18,7 +18,7 @@ const authUrl: string = `${apiPrefix}/auth/`;
 const useSettingsStore = defineStore('settings', () => {
     const loggedIn = ref<boolean>(false);
     const darkTheme = ref<boolean>(false);
-    const expandedNotes = ref<number[]>([]);
+    const expandedNotes = ref<number[]>();
     const openedTabs = ref<number[]>([]);
     const programmingLanguages = ref<Record<string, string>>({});
 
