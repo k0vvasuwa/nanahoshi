@@ -19,6 +19,6 @@ router.register(r'notes', NoteViewSet, 'notes')
 
 urlpatterns = [
     path('', include(router.urls)),
-    path('get-note-title', get_note_title),
+    path('get-note-title/<int:note_id>', get_note_title),
     path('get-note-text/<int:note_id>', get_note_text)
 ]
