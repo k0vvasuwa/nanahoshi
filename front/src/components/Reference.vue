@@ -3,16 +3,21 @@ import {
     ref,
     useTemplateRef,
     onMounted,
-    inject,
-    nextTick
+    inject
 } from 'vue';
 
 import { AxiosError } from 'axios';
 
-import { Draggable } from '@he-tree/vue';
+import {
+    Draggable,
+    StartInfo
+} from '@he-tree/vue';
 import { Stat } from '@he-tree/tree-utils';
+import { dragContext } from '@he-tree/vue';
 import '@he-tree/vue/style/default.css';
 import '@he-tree/vue/style/material-design.css';
+
+import { useConfirm } from 'primevue/useconfirm';
 
 import { MenuItem } from 'primevue/menuitem';
 import ContextMenu from 'primevue/contextmenu';
@@ -35,7 +40,8 @@ import { getRootNote } from '#functions/misc';
 import {
     getNotes,
     createNote,
-    updateNote
+    updateNote,
+    deleteNote
 } from '#functions/requests';
 
 import {
@@ -46,6 +52,7 @@ import {
 
 
 const toast = inject('toast') as Toast;
+const confirm = useConfirm();
 
 const notes = ref<Note[]>([getRootNote()]);
 
@@ -62,6 +69,11 @@ const newNoteHandler = ref({
     dialogVisible: false,
     name: '',
     triedSave: false,
+    async handlePressingKey(event: KeyboardEvent): Promise<void> {
+        if (event.code === 'Enter') {
+            await this.create();
+        }
+    },
     async create(): Promise<void> {
         this.triedSave = true;
 
@@ -85,11 +97,8 @@ const newNoteHandler = ref({
 
             tree.value!.add(createdNote, getStat(parent));
 
-            nextTick((): void => {
-                selectedNoteElement.value.previousElementSibling!.classList.toggle('down');
-            });
-
             this.dialogVisible = false;
+            this.name = '';
 
             toast.success('Запрос выполнен', `Запись «${createdNote.name}» добавлена к записи «${parent.name}»`);
         } catch (e) {
@@ -104,6 +113,11 @@ const renameNoteHandler = ref({
     dialogVisible: false,
     name: '',
     triedSave: false,
+    async handlePressingKey(event: KeyboardEvent) {
+        if (event.key === 'Enter') {
+            await this.rename();
+        }
+    },
     async rename(): Promise<void> {
         this.triedSave = true;
 
@@ -141,11 +155,6 @@ function calcTreeHeight(): void {
     height.value = `${docHeight - offset}px`;
 }
 
-function expandNode(event: PointerEvent, stat: Stat<Note>): void {
-    (event.target as HTMLElement).classList.toggle('down');
-    stat.open = !stat.open;
-}
-
 async function loadChildren(note: Note): Promise<void> {
     if (note.children !== undefined) {
         return;
@@ -157,6 +166,62 @@ async function loadChildren(note: Note): Promise<void> {
 
 function getStat(note: Note): Stat<Note> {
     return tree.value!.getStat(note) as Stat<Note>;
+}
+
+function eachDraggable(stat: Stat<Note>): boolean {
+    return stat.data.id !== 1;
+}
+
+async function handleNodeBeforeDragOpen(stat: Stat<Note>): Promise<void> {
+    await loadChildren(stat.data);
+}
+
+async function handleDrop(): Promise<void> {
+    const startInfo: StartInfo = dragContext.startInfo;
+    const indexBeforeDrop: number = startInfo.indexBeforeDrop;
+    const oldParent: Note = startInfo.parent!.data;
+
+    const draggingNote: Note = startInfo.dragNode.data;
+
+    const finalInfo: StartInfo = dragContext.targetInfo;
+    const newParent: Note = finalInfo.parent!.data;
+    const indexAfterDrop: number = newParent.children!.indexOf(draggingNote);
+
+    if (oldParent.id === newParent.id) {
+        if (indexBeforeDrop === indexAfterDrop) {
+            return;
+        }
+
+        try {
+            await updateNote(draggingNote.id, {
+                position: indexAfterDrop + 1
+            });
+        } catch (e) {
+            const error = e as AxiosError;
+            toast.error(`Не уделось поменять позицию записи «${draggingNote.name}»`, error.message);
+            return;
+        }
+    } else {
+        try {
+            await updateNote(draggingNote.id, {
+                position: indexAfterDrop + 1,
+                parent: newParent.id
+            });
+
+            if (oldParent.children!.length === 0) {
+                oldParent.children = undefined;
+                oldParent.has_children = false;
+            }
+
+            if (newParent.children!.length === 1) {
+                newParent.has_children = true;
+            }
+        } catch (e) {
+            const error = e as AxiosError;
+            toast.error(`Не удалось переместить запись «${draggingNote.name}»`, error.message);
+            return;
+        }
+    }
 }
 
 function openContextMenu(event: PointerEvent, note: Note): void {
@@ -177,12 +242,51 @@ function openContextMenu(event: PointerEvent, note: Note): void {
 contextMenuItems.value[0].command = (): void => {
     newNoteHandler.value.triedSave = false;
     newNoteHandler.value.dialogVisible = true;
+    loadChildren(selectedNote.value);
 };
 
 contextMenuItems.value[1].command = (): void => {
     renameNoteHandler.value.triedSave = false;
     renameNoteHandler.value.name = selectedNote.value.name;
     renameNoteHandler.value.dialogVisible = true;
+};
+
+contextMenuItems.value[2].command = (): void => {
+    const target: Note = selectedNote.value;
+
+    confirm.require({
+        header: `${target.name} – удаление`,
+        message: `Удалить запись «${target.name}»?`,
+        icon: 'pi pi-trash',
+        rejectProps: {
+            label: 'Оставить',
+            outlined: true
+        },
+        acceptProps: {
+            label: 'Удалить',
+            severity: 'danger'
+        },
+        async accept(): Promise<void> {
+            try {
+                await deleteNote(target.id);
+
+                const stat: Stat<Note> = getStat(target);
+                const parent: Note = stat.parent?.data!;
+
+                tree.value!.remove(stat);
+
+                if (parent.children!.length === 0) {
+                    parent.has_children = false;
+                }
+
+                toast.success('Удаление выполнено', `Запись «${target.name}» удалена`);
+            } catch (e) {
+                const error = e as AxiosError;
+
+                toast.error('Не удалось удалить запись', error.message);
+            }
+        }
+    });
 };
 
 const rootNote: Note = notes.value[0];
@@ -195,8 +299,8 @@ getNotes(1).then(
 );
 
 onMounted((): void => {
-    tree.value!.$el.querySelector('i').classList.toggle('down');
-    getStat(rootNote).open = true;
+    const rootStat: Stat<Note> = getStat(rootNote);
+    rootStat.open = true;
 
     calcTreeHeight();
     window.addEventListener('resize', calcTreeHeight);
@@ -205,10 +309,11 @@ onMounted((): void => {
 
 <template>
     <Draggable id="tree" class="mtl-tree" ref="tree" v-model="notes" virtualization textKey="name" :defaultOpen="false"
-               treeLine>
+               treeLine :rootDroppable="false" :eachDraggable="eachDraggable" :beforeDragOpen="handleNodeBeforeDragOpen"
+               :dragOpenDelay="800" @afterDrop="handleDrop">
         <template #default="{ node: note, stat}">
-            <i v-if="note.has_children" class="pi pi-angle-right" @click="expandNode($event as PointerEvent, stat)"
-               @mouseenter.once="loadChildren(note)" />
+            <i v-if="note.has_children" class="pi pi-angle-right" :class="{ down: stat.open }"
+               @click="stat.open = !stat.open" @mouseenter.once="loadChildren(note)" />
             <div class="spacer" @contextmenu="openContextMenu($event as PointerEvent, note)">
                 {{ note.name }}
             </div>
@@ -219,7 +324,8 @@ onMounted((): void => {
         <IconField>
             <InputIcon class="pi pi-file" />
             <InputText v-model="newNoteHandler.name" placeholder="Имя записи" variant="filled"
-                       :invalid="!newNoteHandler.name && newNoteHandler.triedSave" size="large" fluid />
+                       :invalid="!newNoteHandler.name && newNoteHandler.triedSave" size="large" fluid
+                       @keydown="newNoteHandler.handlePressingKey($event)" />
         </IconField>
         <template #footer>
             <Button label="Отмена" severity="danger" outlined @click="newNoteHandler.dialogVisible = false;" />
@@ -230,7 +336,8 @@ onMounted((): void => {
         <IconField>
             <InputIcon class="pi pi-file" />
             <InputText v-model="renameNoteHandler.name" placeholder="Имя записи" variant="filled"
-                       :invalid="!renameNoteHandler.name && renameNoteHandler.triedSave" size="large" fluid />
+                       :invalid="!renameNoteHandler.name && renameNoteHandler.triedSave" size="large" fluid
+                       @keydown="renameNoteHandler.handlePressingKey($event)" />
         </IconField>
         <template #footer>
             <Button label="Отмена" severity="danger" outlined @click="renameNoteHandler.dialogVisible = false;" />
