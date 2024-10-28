@@ -1,3 +1,10 @@
+from django.http import (
+    HttpRequest,
+    JsonResponse
+)
+
+from django.views.decorators.http import require_http_methods
+
 from rest_framework import (
     permissions,
     viewsets
@@ -14,6 +21,8 @@ from .serializers import (
     SettingsSerializer,
     NoteSerializer
 )
+
+from authentication.views import require_login
 
 
 class SettingsViewSet(viewsets.ModelViewSet):
@@ -38,3 +47,15 @@ class NoteViewSet(viewsets.ModelViewSet):
 
         parent: Note = Note.objects.get(pk=parent_id)
         return Note.objects.filter(parent=parent).order_by('position')
+
+
+@require_login
+@require_http_methods(['GET'])
+def get_note(request: HttpRequest, note_id: int) -> JsonResponse:
+    note: Note = Note.objects.get(pk=note_id)
+
+    with open(note.get_file_path(), 'r', encoding='utf-8') as note_file:
+        return JsonResponse({
+            'title': f'{note}',
+            'text': note_file.read()
+        })
