@@ -13,9 +13,18 @@ import Button from 'primevue/button';
 import { MenuItem } from 'primevue/menuitem';
 import Menu from 'primevue/menu';
 
+import Tabs from 'primevue/tabs';
+import TabList from 'primevue/tablist';
+import Tab from 'primevue/tab';
+import TabPanels from 'primevue/tabpanels';
+import TabPanel from 'primevue/tabpanel';
+
 import useSettingsStore from '#store';
 
-import { Redirect } from '#types';
+import {
+    TabNote,
+    Redirect
+} from '#types';
 
 import Reference from '#components/Reference';
 import NotePage from '#components/NotePage';
@@ -28,6 +37,9 @@ const redirect = inject('redirect') as Redirect;
 
 const menu = useTemplateRef<InstanceType<typeof Menu>>('menu');
 const menuItems = ref<MenuItem[]>(getMenuItems());
+
+const tabs = ref<TabNote[]>([]);
+const currentTab = ref<string>();
 
 
 
@@ -63,7 +75,22 @@ function getMenuItems(): MenuItem[] {
             <Reference />
         </SplitterPanel>
         <SplitterPanel :minSize="60">
-            <NotePage />
+            <Tabs v-if="currentTab" v-model:value="currentTab" scrollable>
+                <TabList>
+                    <Tab v-for="tab in tabs" :key="tab.noteId" :value="tab.value">
+                        <div class="flex-row align-center">
+                            <div>
+                                {{ tab.name }}
+                            </div>
+                        </div>
+                    </Tab>
+                </TabList>
+                <TabPanels>
+                    <TabPanel v-for="tab in tabs" :key="tab.noteId" :value="tab.value">
+                        <NotePage :id="tab.noteId" />
+                    </TabPanel>
+                </TabPanels>
+            </Tabs>
         </SplitterPanel>
     </Splitter>
 </template>
