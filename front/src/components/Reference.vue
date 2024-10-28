@@ -56,6 +56,9 @@ const emit = defineEmits<{
     selectNote: [
         note: TabNote,
         active: boolean
+    ],
+    renameNote: [
+
     ]
 }>();
 
@@ -172,13 +175,32 @@ async function loadChildren(note: Note): Promise<void> {
     tree.value!.addMulti(note.children, getStat(note));
 }
 
+function getNoteTitle(note: Note): string {
+    if (note.id === 1) {
+        return 'Конспектики';
+    }
+
+    const stat: Stat<Note> = getStat(note);
+    const parts: string[] = [];
+    for (const parent of tree.value!.iterateParent(stat, { withSelf: true })) {
+        if ((parent.data as Note).id === 1) {
+            break;
+        }
+
+        parts.unshift((parent.data as Note).name);
+    }
+
+    return parts.join('. ');
+}
+
 function handleSelectNote(event: MouseEvent, note: Note): void {
     const button: number = event.button;
     if (button === 0) {
         emit('selectNote', {
             noteId: note.id,
             value: `${note.id}`,
-            name: note.name
+            name: note.name,
+            title: getNoteTitle(note)
         }, !event.ctrlKey);
         event.preventDefault();
     }
