@@ -45,6 +45,10 @@ export async function checkNoteHasSpecificParent(targetId: number, parentId: num
     return (await axios.get(`${storageUrl}note-has-parent?target_id=${targetId}&parent_id=${parentId}`)).data.result;
 }
 
+export async function checkNoteExists(id: number): Promise<boolean> {
+    return (await axios.get(`${storageUrl}note-exists/${id}`)).data.result;
+}
+
 export async function getNoteTitle(id: number): Promise<string> {
     return (await axios.get(`${storageUrl}get-note-title/${id}`)).data.title;
 }
