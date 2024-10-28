@@ -42,7 +42,7 @@ export async function deleteNote(id: number): Promise<void> {
 }
 
 export async function getNoteTitle(id: number): Promise<string> {
-    return (await axios.get(`${storageUrl}get-note-title/${id}`)).data;
+    return (await axios.get(`${storageUrl}get-note-title/${id}`)).data.title;
 }
 
 export async function getNoteText(id: number): Promise<string> {
