@@ -59,6 +59,49 @@ function getMenuItems(): MenuItem[] {
         }
     ];
 }
+
+function addTab(newTab: TabNote, active: boolean): void {
+    let alreadyExists: boolean = false;
+
+    for (const tab of tabs.value) {
+        if (tab.value === newTab.value) {
+            alreadyExists = true;
+            break;
+        }
+    }
+
+    if (!alreadyExists) {
+        tabs.value.push(newTab);
+    }
+
+    if (active) {
+        currentTab.value = newTab.value;
+    }
+}
+
+function closeTab(event: PointerEvent, value: string): void {
+    event.stopPropagation();
+    const N: number = tabs.value.length;
+
+    for (let i: number = 0; i < N; i++) {
+        if (tabs.value[i].value === value) {
+            tabs.value.splice(i, 1);
+            if (N === 1) {
+                currentTab.value = undefined;
+            } else {
+                if (value === currentTab.value) {
+                    let prevIndex: number = i - 1;
+                    if (prevIndex < 0) {
+                        prevIndex = 0;
+                    }
+
+                    currentTab.value = tabs.value[prevIndex].value;
+                }
+            }
+            break;
+        }
+    }
+}
 </script>
 
 <template>
@@ -69,10 +112,10 @@ function getMenuItems(): MenuItem[] {
                 <div class="spacer"></div>
                 <Button :icon="settings.darkTheme ? 'pi pi-moon' : 'pi pi-sun'" text rounded
                         @click="settings.toggleTheme(true)" />
-                <Button icon="pi pi-cog" text rounded @click="menu?.toggle"/>
+                <Button icon="pi pi-cog" text rounded @click="menu?.toggle" />
                 <Menu ref="menu" :model="menuItems" popup />
             </div>
-            <Reference />
+            <Reference @selectNote="addTab" />
         </SplitterPanel>
         <SplitterPanel :minSize="60">
             <Tabs v-if="currentTab" v-model:value="currentTab" scrollable>
@@ -82,6 +125,8 @@ function getMenuItems(): MenuItem[] {
                             <div>
                                 {{ tab.name }}
                             </div>
+                            <Button class="close-tab-btn" icon="pi pi-times-circle" text rounded size="small"
+                                    @click="closeTab($event as PointerEvent, tab.value)" />
                         </div>
                     </Tab>
                 </TabList>
@@ -98,5 +143,23 @@ function getMenuItems(): MenuItem[] {
 <style scoped>
 .p-splitter {
     border: none;
+}
+
+.p-tab {
+    padding: 2px;
+    --close-tab-btn-opacity: 0;
+}
+
+.p-tab:hover {
+    --close-tab-btn-opacity: 1;
+}
+
+.p-tab-active {
+    --close-tab-btn-opacity: 1;
+}
+
+.close-tab-btn {
+    opacity: var(--close-tab-btn-opacity);
+    transition: opacity 150ms;
 }
 </style>
