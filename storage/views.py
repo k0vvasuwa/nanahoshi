@@ -70,16 +70,25 @@ def get_note_page(request: HttpRequest, note_id: int) -> HttpResponse:
 @require_login
 @require_http_methods(['GET'])
 def check_note_has_specific_parent(request: HttpRequest) -> JsonResponse:
-    target_id: int = request.GET.get('target_id')
-    parent_id: int = request.GET.get('parent_id')
+    target_id: int = int(request.GET.get('target_id'))
+    parent_id: int = int(request.GET.get('parent_id'))
 
     current_note: Note = Note.objects.get(pk=target_id).parent
 
-    while current_note.id != parent_id or current_note.id != 1:
+    while current_note.id != parent_id and current_note.id != 1:
         current_note = current_note.parent
 
+    print(current_note.name)
     res: bool = current_note.id == parent_id
 
     return JsonResponse({
         'result': res
+    })
+
+
+@require_login
+@require_http_methods(['GET'])
+def check_note_exists(request: HttpRequest, note_id: int) -> JsonResponse:
+    return JsonResponse({
+        'result': Note.objects.filter(id=note_id).exists()
     })
