@@ -11,6 +11,9 @@ from rest_framework import (
     viewsets
 )
 
+from rest_framework.decorators import action
+from rest_framework.response import Response
+
 from django_filters.rest_framework import DjangoFilterBackend
 
 from .models import (
@@ -30,6 +33,31 @@ class SettingsViewSet(viewsets.ModelViewSet):
     queryset = Settings.objects.all()
     serializer_class = SettingsSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+    @action(detail=True, methods=['patch'])
+    def add_expanded_note(self, request, pk=None):
+        settings = self.get_object()
+        note_id = request.data.get('note_id')
+        print(note_id)
+        if note_id not in settings.expanded_notes:
+            settings.expanded_notes.append(note_id)
+            settings.save(update_fields=['expanded_notes'])
+
+        return Response({
+            'message': 'Successful'
+        })
+
+    @action(detail=True, methods=['patch'])
+    def remove_expanded_note(self, request, pk=None):
+        settings = self.get_object()
+        note_id = request.data.get('note_id')
+        if note_id in settings.expanded_notes:
+            settings.expanded_notes.remove(note_id)
+            settings.save(update_fields=['expanded_notes'])
+
+        return Response({
+            'message': 'Successful'
+        })
 
 
 class NoteViewSet(viewsets.ModelViewSet):
