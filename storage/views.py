@@ -52,9 +52,17 @@ class NoteViewSet(viewsets.ModelViewSet):
 
 @require_login
 @require_http_methods(['GET'])
-def get_note(request: HttpRequest, note_id: int) -> HttpResponse:
+def get_note_title(request: HttpRequest, note_id: int) -> JsonResponse:
     note: Note = Note.objects.get(pk=note_id)
+    return JsonResponse({
+        'title': f'{note}'
+    })
 
+
+@require_login
+@require_http_methods(['GET'])
+def get_note_page(request: HttpRequest, note_id: int) -> HttpResponse:
+    note: Note = Note.objects.get(pk=note_id)
     with open(note.get_file_path(), 'r', encoding='utf-8') as note_file:
         return HttpResponse(note_file.read())
 
