@@ -5,6 +5,8 @@ import {
     inject
 } from 'vue';
 
+import axios from 'axios';
+
 import Splitter from 'primevue/splitter';
 import SplitterPanel from 'primevue/splitterpanel';
 
@@ -28,6 +30,7 @@ import {
 } from '#types';
 
 import {
+    storageUrl,
     checkNoteHasSpecificParent,
     checkNoteExists,
     getNoteTitle
@@ -35,7 +38,6 @@ import {
 
 import Reference from '#components/Reference';
 import NotePage from '#components/NotePage';
-import axios from 'axios';
 
 
 
@@ -80,6 +82,7 @@ function addTab(newTab: TabNote, active: boolean): void {
 
     if (!alreadyExists) {
         tabs.value.push(newTab);
+        axios.patch(`${storageUrl}settings/1/add_opened_tab/`, { note_id: newTab.noteId });
     }
 
     if (active) {
@@ -109,6 +112,8 @@ function closeTab(value: string, event?: PointerEvent): void {
             break;
         }
     }
+
+    axios.patch(`${storageUrl}settings/1/remove_opened_tab/`, { note_id: +value });
 }
 
 async function processTabsTitles(renamedNote: Note): Promise<void> {
@@ -143,6 +148,33 @@ async function checkTabsOnExistence(deletedNoteId: number): Promise<void> {
         }
     }
 }
+
+async function loadSavedTabs(): Promise<void> {
+    await settings.load();
+    for (const tabId of settings.openedTabs) {
+        const title: string = await getNoteTitle(tabId);
+
+        let name: string;
+
+        if (tabId === 1) {
+            name = 'Конспектики';
+        } else {
+            const titleParts: string[] = title.split('. ');
+            name = titleParts.pop()!;
+        }
+
+        tabs.value.push({
+            value: `${tabId}`,
+            noteId: tabId,
+            name,
+            title
+        });
+    }
+}
+
+
+
+loadSavedTabs();
 </script>
 
 <template>
