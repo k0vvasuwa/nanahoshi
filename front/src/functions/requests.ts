@@ -41,6 +41,10 @@ export async function deleteNote(id: number): Promise<void> {
     await axios.delete(`${storageUrl}notes/${id}/`);
 }
 
-export async function getNote(id: number): Promise<string> {
+export async function checkNoteHasSpecificParent(targetId: number, parentId: number): Promise<boolean> {
+    return (await axios.get(`${storageUrl}note-has-parent?target_id=${targetId}&parent_id=${parentId}`)).data.result;
+}
+
+export async function getNotePage(id: number): Promise<string> {
     return (await axios.get(`${storageUrl}get-note/${id}`)).data;
 }
