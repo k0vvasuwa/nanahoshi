@@ -38,7 +38,6 @@ class SettingsViewSet(viewsets.ModelViewSet):
     def add_expanded_note(self, request, pk=None):
         settings = self.get_object()
         note_id = request.data.get('note_id')
-        print(note_id)
         if note_id not in settings.expanded_notes:
             settings.expanded_notes.append(note_id)
             settings.save(update_fields=['expanded_notes'])
