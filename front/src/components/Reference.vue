@@ -32,7 +32,8 @@ import Button from 'primevue/button';
 
 import {
     Toast,
-    Note
+    Note,
+    TabNote
 } from '#types';
 
 import { getRootNote } from '#functions/misc';
@@ -50,6 +51,13 @@ import {
 } from '#functions/context_menu';
 
 
+
+const emit = defineEmits<{
+    selectNote: [
+        note: TabNote,
+        active: boolean
+    ]
+}>();
 
 const toast = inject('toast') as Toast;
 const confirm = useConfirm();
@@ -162,6 +170,18 @@ async function loadChildren(note: Note): Promise<void> {
 
     note.children = await getNotes(note.id);
     tree.value!.addMulti(note.children, getStat(note));
+}
+
+function handleSelectNote(event: MouseEvent, note: Note): void {
+    const button: number = event.button;
+    if (button === 0 || button === 1) {
+        emit('selectNote', {
+            noteId: note.id,
+            value: `${note.id}`,
+            name: note.name
+        }, button === 0);
+        event.preventDefault();
+    }
 }
 
 function getStat(note: Note): Stat<Note> {
@@ -314,7 +334,8 @@ onMounted((): void => {
         <template #default="{ node: note, stat}">
             <i v-if="note.has_children" class="pi pi-angle-right" :class="{ down: stat.open }"
                @click="stat.open = !stat.open" @mouseenter.once="loadChildren(note)" />
-            <div class="spacer" @contextmenu="openContextMenu($event as PointerEvent, note)">
+            <div class="spacer" @contextmenu="openContextMenu($event as PointerEvent, note)"
+                 @mousedown="handleSelectNote($event, note)">
                 {{ note.name }}
             </div>
         </template>
