@@ -6,7 +6,7 @@ import {
     inject
 } from 'vue';
 
-import { AxiosError } from 'axios';
+import axios, { AxiosError } from 'axios';
 
 import {
     Draggable,
@@ -29,6 +29,7 @@ import InputText from 'primevue/inputtext';
 import Dialog from 'primevue/dialog';
 import Button from 'primevue/button';
 
+import useSettingsStore from '#store';
 
 import {
     Toast,
@@ -39,6 +40,7 @@ import {
 import { getRootNote } from '#functions/misc';
 
 import {
+    storageUrl,
     getNotes,
     createNote,
     updateNote,
@@ -69,7 +71,9 @@ const emit = defineEmits<{
 const toast = inject('toast') as Toast;
 const confirm = useConfirm();
 
-const notes = ref<Note[]>([getRootNote()]);
+const settings = useSettingsStore();
+
+const notes = ref<Note[]>([]);
 
 const tree = useTemplateRef<InstanceType<typeof Draggable>>('tree');
 const height = ref<string>('800px');
@@ -101,7 +105,10 @@ const newNoteHandler = ref({
             const createdNote: Note = await createNote(this.name, parent.id);
 
             const parentStat: Stat<Note> = getStat(parent);
-            parentStat.open = true;
+            if (!parentStat.open) {
+                parentStat.open = true;
+                addExpandedNote(parentStat.data.id);
+            }
 
             if (!parent.has_children) {
                 parent.has_children = true;
@@ -166,6 +173,20 @@ const renameNoteHandler = ref({
 
 
 
+async function addRootNote(): Promise<void> {
+    await settings.load();
+    notes.value.push(getRootNote());
+    tree.value?.add(notes.value[0]);
+}
+
+async function addExpandedNote(id: number): Promise<void> {
+    await axios.patch(`${storageUrl}settings/1/add_expanded_note/`, { note_id: id });
+}
+
+async function removeExpandedNote(id: number): Promise<void> {
+    await axios.patch(`${storageUrl}settings/1/remove_expanded_note/`, { note_id: id });
+}
+
 function calcTreeHeight(): void {
     const docHeight: number = document.documentElement.clientHeight;
     const offset: number = tree.value!.$el.offsetTop;
@@ -204,6 +225,25 @@ function eachDraggable(stat: Stat<Note>): boolean {
 
 async function handleNodeBeforeDragOpen(stat: Stat<Note>): Promise<void> {
     await loadChildren(stat.data);
+    addExpandedNote(stat.data.id);
+}
+
+function toggleNode(stat: Stat<Note>): void {
+    stat.open = !stat.open;
+    const noteId: number = stat.data.id;
+    if (stat.open) {
+        addExpandedNote(noteId);
+    } else {
+        removeExpandedNote(noteId);
+    }
+}
+
+function statHandler(stat: Stat<Note>): Stat<Note> {
+    if (settings.expandedNotes!.includes(stat.data.id)) {
+        stat.open = true;
+    }
+    loadChildren(stat.data);
+    return stat;
 }
 
 async function handleDrop(): Promise<void> {
@@ -241,6 +281,7 @@ async function handleDrop(): Promise<void> {
             if (oldParent.children!.length === 0) {
                 oldParent.children = undefined;
                 oldParent.has_children = false;
+                removeExpandedNote(oldParent.id);
             }
 
             if (newParent.children!.length === 1) {
@@ -309,6 +350,7 @@ contextMenuItems.value[2].command = (): void => {
 
                 if (parent.children!.length === 0) {
                     parent.has_children = false;
+                    removeExpandedNote(parent.id);
                 }
 
                 toast.success('Удаление выполнено', `Запись «${target.name}» удалена`);
@@ -321,20 +363,8 @@ contextMenuItems.value[2].command = (): void => {
     });
 };
 
-
-
-const rootNote: Note = notes.value[0];
-
-getNotes(1).then(
-    children => {
-        rootNote.children = children;
-        tree.value!.addMulti(children, getStat(rootNote));
-    }
-);
-
 onMounted((): void => {
-    const rootStat: Stat<Note> = getStat(rootNote);
-    rootStat.open = true;
+    addRootNote();
 
     calcTreeHeight();
     window.addEventListener('resize', calcTreeHeight);
@@ -344,10 +374,10 @@ onMounted((): void => {
 <template>
     <Draggable id="tree" class="mtl-tree" ref="tree" v-model="notes" virtualization textKey="name" :defaultOpen="false"
                treeLine :rootDroppable="false" :eachDraggable="eachDraggable" :beforeDragOpen="handleNodeBeforeDragOpen"
-               :dragOpenDelay="800" @afterDrop="handleDrop">
+               :dragOpenDelay="800" @afterDrop="handleDrop" :statHandler="statHandler">
         <template #default="{ node: note, stat}">
             <i v-if="note.has_children" class="pi pi-angle-right" :class="{ down: stat.open }"
-               @click="stat.open = !stat.open" @mouseenter.once="loadChildren(note)" />
+               @click="toggleNode(stat)" @mouseenter.once="loadChildren(note)" />
             <div class="spacer" @contextmenu="openContextMenu($event as PointerEvent, note)"
                  @mouseup="handleSelectNote($event, note)">
                 {{ note.name }}
@@ -360,7 +390,7 @@ onMounted((): void => {
             <InputIcon class="pi pi-file" />
             <InputText v-model="newNoteHandler.name" placeholder="Имя записи" variant="filled"
                        :invalid="!newNoteHandler.name && newNoteHandler.triedSave" size="large" fluid
-                       @keydown="newNoteHandler.handlePressingKey($event)" />
+                       @keydown="newNoteHandler.handlePressingKey($event)" autofocus />
         </IconField>
         <template #footer>
             <Button label="Отмена" severity="danger" outlined @click="newNoteHandler.dialogVisible = false;" />
@@ -372,7 +402,7 @@ onMounted((): void => {
             <InputIcon class="pi pi-file" />
             <InputText v-model="renameNoteHandler.name" placeholder="Имя записи" variant="filled"
                        :invalid="!renameNoteHandler.name && renameNoteHandler.triedSave" size="large" fluid
-                       @keydown="renameNoteHandler.handlePressingKey($event)" />
+                       @keydown="renameNoteHandler.handlePressingKey($event)" autofocus />
         </IconField>
         <template #footer>
             <Button label="Отмена" severity="danger" outlined @click="renameNoteHandler.dialogVisible = false;" />
