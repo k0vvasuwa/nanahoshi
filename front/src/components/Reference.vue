@@ -42,7 +42,8 @@ import {
     getNotes,
     createNote,
     updateNote,
-    deleteNote
+    deleteNote,
+    getNoteTitle
 } from '#functions/requests';
 
 import {
@@ -58,7 +59,10 @@ const emit = defineEmits<{
         active: boolean
     ],
     renameNote: [
-
+        renamedNote: Note
+    ],
+    deleteNote: [
+        id: number
     ]
 }>();
 
@@ -143,6 +147,8 @@ const renameNoteHandler = ref({
                 name: this.name
             });
 
+            emit('renameNote', target);
+
             const oldLabel: string = target.name;
 
             target.name = renamedNote.name;
@@ -175,32 +181,14 @@ async function loadChildren(note: Note): Promise<void> {
     tree.value!.addMulti(note.children, getStat(note));
 }
 
-function getNoteTitle(note: Note): string {
-    if (note.id === 1) {
-        return 'Конспектики';
-    }
-
-    const stat: Stat<Note> = getStat(note);
-    const parts: string[] = [];
-    for (const parent of tree.value!.iterateParent(stat, { withSelf: true })) {
-        if ((parent.data as Note).id === 1) {
-            break;
-        }
-
-        parts.unshift((parent.data as Note).name);
-    }
-
-    return parts.join('. ');
-}
-
-function handleSelectNote(event: MouseEvent, note: Note): void {
+async function handleSelectNote(event: MouseEvent, note: Note): Promise<void> {
     const button: number = event.button;
     if (button === 0) {
         emit('selectNote', {
             noteId: note.id,
             value: `${note.id}`,
             name: note.name,
-            title: getNoteTitle(note)
+            title: await getNoteTitle(note.id)
         }, !event.ctrlKey);
         event.preventDefault();
     }
@@ -312,6 +300,8 @@ contextMenuItems.value[2].command = (): void => {
             try {
                 await deleteNote(target.id);
 
+                emit('deleteNote', target.id);
+
                 const stat: Stat<Note> = getStat(target);
                 const parent: Note = stat.parent?.data!;
 
@@ -330,6 +320,8 @@ contextMenuItems.value[2].command = (): void => {
         }
     });
 };
+
+
 
 const rootNote: Note = notes.value[0];
 
