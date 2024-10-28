@@ -7,7 +7,8 @@ from rest_framework import routers
 
 from .views import (
     SettingsViewSet,
-    NoteViewSet
+    NoteViewSet,
+    get_note
 )
 
 
@@ -16,5 +17,6 @@ router.register(r'settings', SettingsViewSet)
 router.register(r'notes', NoteViewSet, 'notes')
 
 urlpatterns = [
-    path('', include(router.urls))
+    path('', include(router.urls)),
+    path('get-note/<int:note_id>', get_note)
 ]
