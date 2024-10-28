@@ -21,6 +21,12 @@ export type Note = {
     children?: Note[]
 }
 
+export type TabNote = {
+    value: string
+    noteId: number
+    name: string
+}
+
 
 
 type ToastCall = (message: string, details?: string) => void
