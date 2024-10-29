@@ -241,8 +241,8 @@ function toggleNode(stat: Stat<Note>): void {
 function statHandler(stat: Stat<Note>): Stat<Note> {
     if (settings.expandedNotes!.includes(stat.data.id)) {
         stat.open = true;
+        loadChildren(stat.data);
     }
-    loadChildren(stat.data);
     return stat;
 }
 

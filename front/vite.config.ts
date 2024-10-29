@@ -35,6 +35,7 @@ export default defineConfig({
         }
     },
     build: {
-        assetsDir: 'static'
+        assetsDir: 'static',
+        minify: false
     }
 });

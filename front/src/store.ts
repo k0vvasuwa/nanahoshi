@@ -13,7 +13,7 @@ import {
 
 
 
-const authUrl: string = `${apiPrefix}/auth/`;
+const authUrl: string = `${apiPrefix}auth/`;
 
 const useSettingsStore = defineStore('settings', () => {
     const loggedIn = ref<boolean>(false);
@@ -66,7 +66,7 @@ const useSettingsStore = defineStore('settings', () => {
     }
 
     async function load(): Promise<void> {
-        const data: Settings = (await axios.get(`${storageUrl}settings/1`)).data;
+        const data: Settings = (await axios.get(`${storageUrl}settings/1/`)).data;
 
         if (darkTheme.value !== data.dark_theme) {
             toggleTheme();

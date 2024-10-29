@@ -23,7 +23,7 @@ export async function setCsrfToken(): Promise<void> {
 }
 
 export async function getNotes(parentId: number): Promise<Note[]> {
-    return (await axios.get(`${storageUrl}notes?parent=${parentId}`)).data;
+    return (await axios.get(`${storageUrl}notes/?parent=${parentId}`)).data;
 }
 
 export async function createNote(name: string, parent: number): Promise<Note> {
