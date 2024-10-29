@@ -125,6 +125,20 @@ def get_note_page(request: HttpRequest, note_id: int) -> HttpResponse:
 
 
 @require_login
+@require_http_methods(['PATCH'])
+def update_note_page(request: HttpRequest, note_id: int) -> JsonResponse:
+    new_data: str = request.body.decode('utf-8')
+    note: Note = Note.objects.get(pk=note_id)
+
+    with open(note.get_file_path(), 'w', encoding='utf-8') as note_file:
+        note_file.write(new_data)
+
+    return JsonResponse({
+        'message': 'Successful'
+    })
+
+
+@require_login
 @require_http_methods(['GET'])
 def check_note_has_specific_parent(request: HttpRequest) -> JsonResponse:
     target_id: int = int(request.GET.get('target_id'))
