@@ -17,9 +17,14 @@ import {
     Essentials,
     Paragraph,
     Undo,
-    Font,
     Bold,
     Italic,
+    Underline,
+    Strikethrough,
+    Subscript,
+    Superscript,
+    Font,
+    Code,
     icons
 } from 'ckeditor5';
 
@@ -65,9 +70,14 @@ const config = ref<EditorConfig>({
         Paragraph,
         Close,
         Undo,
-        Font,
         Bold,
-        Italic
+        Italic,
+        Underline,
+        Strikethrough,
+        Subscript,
+        Superscript,
+        Font,
+        Code
     ],
     translations: [
         coreTranslations
@@ -80,11 +90,18 @@ const config = ref<EditorConfig>({
         '|',
         'bold',
         'italic',
+        'underline',
+        'strikethrough',
+        '|',
+        'subscript',
+        'superscript',
         '|',
         'fontFamily',
         'fontSize',
         'fontColor',
-        'fontBackgroundColor'
+        'fontBackgroundColor',
+        '|',
+        'code'
     ],
     fontFamily: {
         options: [
@@ -189,5 +206,9 @@ onMounted(async (): Promise<void> => {
     border-bottom: 1px solid var(--page-title-border-color);
     min-height: 41px;
     max-height: 41px;
+}
+
+:deep(code) {
+    font-family: 'Cascadia Code';
 }
 </style>
