@@ -8,6 +8,7 @@
     --page-title-border-color: #e2e8f0;
 
     --code-background: #2b2d30;
+    --code-block-color: rgb(51, 65, 85);
 
     --th-background: #ece7e7;
 }
@@ -20,6 +21,8 @@
     --node-drag-background: #576465;
 
     --page-title-border-color: #3f3f46;
+
+    --code-block-color: white;
 
     --th-background: #343439;
 
