@@ -6,6 +6,8 @@
     --node-drag-background: #ddf2f9;
 
     --page-title-border-color: #e2e8f0;
+
+    --code-background: #2b2d30;
 }
 
 :root[class="dark"] {
