@@ -14,7 +14,8 @@ export default defineConfig({
     plugins: [vue()],
     server: {
         proxy: {
-            '/api': proxy
+            '/api': proxy,
+            '/media': proxy
         }
     },
     resolve: {
