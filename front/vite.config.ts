@@ -33,5 +33,8 @@ export default defineConfig({
             '#functions': '/src/functions',
             '#components': '/src/components'
         }
+    },
+    build: {
+        assetsDir: 'static'
     }
 });
