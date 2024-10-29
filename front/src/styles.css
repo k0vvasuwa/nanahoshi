@@ -4,6 +4,8 @@
     --node-hover-background: #eaebef;
     --expand-icon-hover-background: #fff;
     --node-drag-background: #ddf2f9;
+
+    --page-title-border-color: #e2e8f0;
 }
 
 :root[class="dark"] {
@@ -12,6 +14,20 @@
     --node-hover-background: #393941;
     --expand-icon-hover-background: #000;
     --node-drag-background: #576465;
+
+    --page-title-border-color: #3f3f46;
+
+    --ck-color-base-background: #1e1e22;
+    --ck-color-base-border: #3f3f46;
+    --ck-color-base-text: white;
+
+    --ck-color-focus-border: #818080;
+    --ck-color-focus-outer-shadow: #5c5c63;
+
+    --ck-color-button-default-hover-background: #3f3f46;
+    --ck-color-button-default-active-background: #45454c;
+
+    --ck-accessibility-help-dialog-code-background-color: #121212;
 }
 
 body {
@@ -20,6 +36,8 @@ body {
     box-sizing: border-box;
     font-family: Inter, sans-serif;
     background-color: var(--background);
+    min-width: 800px;
+    min-height: 600px;
 }
 
 .flex-row {
