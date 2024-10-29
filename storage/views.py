@@ -1,3 +1,7 @@
+from pathlib import Path
+
+import os
+
 from django.http import (
     HttpRequest,
     HttpResponse,
@@ -15,6 +19,8 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from django_filters.rest_framework import DjangoFilterBackend
+
+from nanahoshi.settings import MEDIA_ROOT
 
 from .models import (
     Settings,
@@ -142,4 +148,26 @@ def check_note_has_specific_parent(request: HttpRequest) -> JsonResponse:
 def check_note_exists(request: HttpRequest, note_id: int) -> JsonResponse:
     return JsonResponse({
         'result': Note.objects.filter(id=note_id).exists()
+    })
+
+
+@require_login
+@require_http_methods(['POST'])
+def upload_image(request: HttpRequest, note_id: int) -> JsonResponse:
+    data = request.FILES['upload']
+    images_dir: Path = MEDIA_ROOT / f'images/{note_id}'
+
+    if not images_dir.exists():
+        images_dir.mkdir()
+
+    image_number: int = len([f for f in os.listdir(images_dir)]) + 1
+
+    extension: str = data.name.split('.')[-1]
+
+    with open(images_dir / f'{image_number}.{extension}', 'wb') as image_file:
+        for chunk in data.file:
+            image_file.write(chunk)
+
+    return JsonResponse({
+        'url': f'/media/images/{note_id}/{image_number}.{extension}'
     })
