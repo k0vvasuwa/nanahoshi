@@ -218,6 +218,11 @@ loadSavedTabs();
     border: none;
 }
 
+.p-tablist {
+    min-height: 45px;
+    max-height: 45px;
+}
+
 .p-tab {
     padding: 2px;
     --close-tab-btn-opacity: 0;
@@ -234,5 +239,9 @@ loadSavedTabs();
 .close-tab-btn {
     opacity: var(--close-tab-btn-opacity);
     transition: opacity 150ms;
+}
+
+.p-tabpanels {
+    padding: 0;
 }
 </style>
