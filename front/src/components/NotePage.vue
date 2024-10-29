@@ -18,6 +18,8 @@ import {
     Paragraph,
     Undo,
     Font,
+    Bold,
+    Italic,
     icons
 } from 'ckeditor5';
 
@@ -63,7 +65,9 @@ const config = ref<EditorConfig>({
         Paragraph,
         Close,
         Undo,
-        Font
+        Font,
+        Bold,
+        Italic
     ],
     translations: [
         coreTranslations
@@ -74,9 +78,11 @@ const config = ref<EditorConfig>({
         'undo',
         'redo',
         '|',
+        'bold',
+        'italic',
+        '|',
         'fontFamily',
         'fontSize',
-        '|',
         'fontColor',
         'fontBackgroundColor'
     ],
