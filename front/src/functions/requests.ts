@@ -54,7 +54,7 @@ export async function getNoteTitle(id: number): Promise<string> {
 }
 
 export async function getNotePage(id: number): Promise<string> {
-    return (await axios.get(`${storageUrl}get-note-page/${id}/`)).data;
+    return (await axios.get(`${storageUrl}get-note-page/${id}`)).data;
 }
 
 export async function updateNotePage(id: number, data: string): Promise<void> {
