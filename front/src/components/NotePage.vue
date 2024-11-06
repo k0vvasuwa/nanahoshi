@@ -435,6 +435,7 @@ onBeforeUnmount((): void => {
 
 :deep(mjx-container[jax="CHTML"][display="true"]) {
     display: inline-block !important;
+    margin: 0;
 }
 
 :deep(.page-content .image) {
